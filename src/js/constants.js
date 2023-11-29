@@ -1,1 +1,1 @@
-export const API_URI = "http://dangkyhoc.onrender.com";
+export const API_URI = "https://weak-gold-dragonfly-hose.cyclic.app";
