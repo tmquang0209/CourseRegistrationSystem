@@ -1,4 +1,4 @@
-import * as elements from "../elements";
+import { view } from "../elements";
 class HomeView {
     dataForm = [];
     constructor() {}
@@ -22,16 +22,26 @@ class HomeView {
         </div>
     </div>`;
 
-        elements.view.innerHTML = markup;
+        view.innerHTML = markup;
     }
 
     updateForm(data) {
         this.dataForm = data;
         const year = document.getElementById("year");
         console.log(data);
+
         data.map((item) => {
             const markup = `<option value="${item.yearId}">${item.yearName}</option>`;
             year.insertAdjacentHTML("beforeend", markup);
+        });
+    }
+
+    renderSemester(data) {
+        const semester = document.getElementById("semester");
+        semester.innerHTML = `<option value="">Chọn kỳ học</option>`;
+        data.forEach((item) => {
+            const markup = `<option value="${item.semesterId}">${item.semesterName}</option>`;
+            semester.insertAdjacentHTML("beforeend", markup);
         });
     }
 
@@ -51,7 +61,7 @@ class HomeView {
             </tr>`;
         });
         const markup = `
-        <div class="row" style="margin-top: 20px;">
+        <div id="result" class="row" style="margin-top: 20px;">
             <table id="result" class="table table-bordered">
                 <thead>
                     <tr>
@@ -72,9 +82,13 @@ class HomeView {
         </div>
         `;
         const container = document.querySelector(".container");
-        const tableElement = container.querySelector(".table");
-        if (tableElement) container.removeChild(tableElement);
+        const tableElement = document.getElementById("result");
+        if (tableElement) tableElement.parentElement.removeChild(tableElement);
         container.insertAdjacentHTML("beforeend", markup);
+    }
+
+    addToTable(className, day, shift) {
+        const getAlias = this._day.indexOf(day);
     }
 }
 

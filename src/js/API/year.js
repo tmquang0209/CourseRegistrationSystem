@@ -1,19 +1,7 @@
-import axios from "axios";
-import { API_URI } from "../constants";
+import { axiosGet } from "../components/axios";
 const fetchYear = async () => {
-    try {
-        const url = API_URI + "/api/getListYear";
-        const response = await axios.get(url, {
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "*/*",
-            },
-        });
-        const responseData = await response.data;
-        return responseData;
-    } catch (err) {
-        console.error(err);
-    }
+    const url = `/api/getListYear`;
+    return axiosGet(url);
 };
 
 export default fetchYear;

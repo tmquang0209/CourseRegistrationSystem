@@ -1,19 +1,20 @@
-import axios from "axios";
-import { API_URI } from "../constants";
-const fetchSchedule = async (semesterId) => {
-    try {
-        const url = API_URI + "/api/getSchedule/" + semesterId;
-        const response = await axios.get(url, {
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "*/*",
-            },
-        });
-        const responseData = await response.data;
-        return responseData;
-    } catch (err) {
-        console.error(err);
-    }
+import { axiosGet, axiosPost } from "../components/axios";
+
+export const fetchSchedule = async (semesterId) => {
+    const url = `/api/getSchedule/${semesterId}`;
+    return axiosGet(url);
 };
 
-export default fetchSchedule;
+export const fetchSubject = async (enrollId) => {
+    const url = `/api/getSubjectSemester/${enrollId}`;
+    return axiosGet(url);
+};
+
+export const fetchScheduleRegister = async (enrollId, password) => {
+    const url = `/api/getClassRegister/`;
+    const body = {
+        enrollId,
+        password,
+    };
+    return axiosPost(url, body);
+};

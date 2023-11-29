@@ -1,4 +1,5 @@
-import * as elements from "../elements";
+import { menu, view } from "../elements";
+
 class MainView {
     _title = "DangKyHoc";
     _navItem = [
@@ -9,9 +10,9 @@ class MainView {
     ];
 
     constructor() {
-        const hashUrl = window.location.hash;
-        this._navItem.forEach((item) => (item.active = item.url === hashUrl));
-        
+        const HASH_URI = window.location.hash;
+        this._navItem.forEach((item) => (item.active = item.url === HASH_URI));
+
         // Bind the event listener to the instance of the class
         this.handleHashChange = this.handleHashChange.bind(this);
         // Add the event listener when the instance is created
@@ -24,7 +25,7 @@ class MainView {
 
     header() {
         const markup = `<header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-        <a href="#home" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
+        <a href="/#home" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none">
             <svg class="bi me-2" width="40" height="32">
                 <use xlink:href="#bootstrap" />
             </svg>
@@ -35,7 +36,7 @@ class MainView {
         ${this._navItem
             .map(
                 (item) =>
-                    `<li class="nav-item"><a href="${
+                    `<li class="nav-item"><a href="/${
                         item.url
                     }" class="nav-link ${item.active ? "active" : ""}">${
                         item.title
@@ -45,13 +46,13 @@ class MainView {
         </ul>
     </header>`;
 
-        elements.menu.innerHTML = markup; // Use innerHTML to replace the content
+        menu.innerHTML = markup; // Use innerHTML to replace the content
     }
 
     handleHashChange() {
-        const hashUrl = window.location.hash;
+        const HASH_URI = window.location.hash;
         this._navItem.forEach((item) => {
-            item.active = item.url === hashUrl;
+            item.active = item.url === HASH_URI;
         });
         console.log(this._navItem);
 
@@ -60,7 +61,7 @@ class MainView {
     }
 
     updateView(data) {
-        elements.view.innerHTML = data;
+        view.innerHTML = data;
     }
 }
 
