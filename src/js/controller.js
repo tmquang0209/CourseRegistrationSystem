@@ -230,6 +230,10 @@ const scheduleController = async () => {
         );
 
         unitPriceInput.addEventListener("input", () => {
+            coefInput.forEach((item) => {
+                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+                scheduleView.updateTotalAmount();
+            });
             scheduleView.updateTotalAmount();
         });
 
