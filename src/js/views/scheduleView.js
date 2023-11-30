@@ -99,7 +99,7 @@ class ScheduleView {
 
     renderSummary() {
         const markup = `
-        <div class="container">
+        <div class="container" id="summaryContainer">
             <div class="alert alert-primary text-danger fw-bold text-center text-uppercase fs-5" role="alert">Danh sách học phần đăng ký</div>
             <div class="d-flex col justify-content-end mb-3">
                 <div class="col-md-4">
@@ -129,6 +129,10 @@ class ScheduleView {
             </div>
         </div>
         `;
+
+        const summaryContainer = document.getElementById("summaryContainer");
+        if (summaryContainer)
+            summaryContainer.parentElement.removeChild(summaryContainer);
         view.insertAdjacentHTML("beforeend", markup);
     }
     updateSummary(data) {
@@ -256,17 +260,21 @@ class ScheduleView {
             (acc, curr) => acc + curr.subject.credits,
             0
         );
+
+        const tfoot = document.querySelector("tfoot");
+        if (tfoot) tfoot.parentElement.removeChild(tfoot);
+
         const markupTotal = `
         <tfoot>
-        <tr class="fw-bold text-danger">
-            <td>Tổng</td>
-            <td>${summary.length} môn học</td>
-            <td></td>
-            <td></td>
-            <td>${totalCredits}</td>
-            <td></td>
-            <td id="totalAmount"></td>
-        </tr>
+            <tr class="fw-bold text-danger">
+                <td>Tổng</td>
+                <td>${summary.length} môn học</td>
+                <td></td>
+                <td></td>
+                <td>${totalCredits}</td>
+                <td></td>
+                <td id="totalAmount"></td>
+            </tr>
         </tfoot>
         `;
 
@@ -308,7 +316,7 @@ class ScheduleView {
             currency: "VND",
         });
     }
-    
+
     loadClassroom(data) {
         const listGroup = document.getElementById("list-group");
         listGroup.innerHTML = ``;

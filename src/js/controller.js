@@ -229,24 +229,20 @@ const scheduleController = async () => {
             `input[id="coef"][data-subject-code]`
         );
 
-        const updateAmountAndTotal = (item) => {
-            scheduleView.updateAmount(item.dataset.subjectCode, item.value);
-            scheduleView.updateTotalAmount();
-        };
-
-        const handleCoefInput = (item) => {
-            item.addEventListener("input", () => {
-                updateAmountAndTotal(item);
-            });
-        };
-
         unitPriceInput.addEventListener("input", () => {
-            coefInput.forEach(handleCoefInput);
+            coefInput.forEach((item) => {
+                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+                scheduleView.updateTotalAmount();
+            });
             scheduleView.updateTotalAmount();
         });
 
-        coefInput.forEach(handleCoefInput);
-
+        coefInput.forEach((item) => {
+            item.addEventListener("input", () => {
+                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+                scheduleView.updateTotalAmount();
+            });
+        });
         return;
     }
 
@@ -333,6 +329,7 @@ const handleClassClick = (data) => {
 
         if (!input.checked) {
             scheduleView.removeFromTable(input.name);
+            scheduleView.updateSummary(data);
             setTimeout(() => {
                 scheduleView.saveToDB();
             }, 1000);
@@ -361,7 +358,7 @@ const handleClassClick = (data) => {
         const reduceClass = [...new Set(findClass)];
         console.log(reduceClass);
         scheduleView.addToTable(input.name, reduceClass);
-        scheduleView.renderSummary(data);
+        scheduleView.updateSummary(data);
     });
 };
 
