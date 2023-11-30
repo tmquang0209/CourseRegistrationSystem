@@ -283,7 +283,6 @@ class ScheduleView {
             `td[id="amount"][data-subject-code="${subjectCode}"]`
         );
 
-        console.log(credits);
         amount.innerHTML =
             Math.round(
                 Number(credits.innerText) *
@@ -309,6 +308,7 @@ class ScheduleView {
             currency: "VND",
         });
     }
+    
     loadClassroom(data) {
         const listGroup = document.getElementById("list-group");
         listGroup.innerHTML = ``;

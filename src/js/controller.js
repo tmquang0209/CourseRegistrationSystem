@@ -229,20 +229,24 @@ const scheduleController = async () => {
             `input[id="coef"][data-subject-code]`
         );
 
-        unitPriceInput.addEventListener("input", () => {
-            coefInput.forEach((item) => {
-                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
-                scheduleView.updateTotalAmount();
+        const updateAmountAndTotal = (item) => {
+            scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+            scheduleView.updateTotalAmount();
+        };
+
+        const handleCoefInput = (item) => {
+            item.addEventListener("input", () => {
+                updateAmountAndTotal(item);
             });
+        };
+
+        unitPriceInput.addEventListener("input", () => {
+            coefInput.forEach(handleCoefInput);
             scheduleView.updateTotalAmount();
         });
 
-        coefInput.forEach((item) => {
-            item.addEventListener("input", () => {
-                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
-                scheduleView.updateTotalAmount();
-            });
-        });
+        coefInput.forEach(handleCoefInput);
+
         return;
     }
 
