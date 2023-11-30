@@ -37,14 +37,14 @@ class ScheduleView {
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-8 table-responsive">
                     <div class="alert alert-primary text-danger fw-bold text-center text-uppercase fs-5" role="alert">Thời
                         khóa biểu</div>
-                    <table class="table table-bordered fixed">
+                    <table class="table table-bordered fixed hidden-scroll-bar">
                         <thead>
                             <tr>
                                 ${this._day
-                                    .map((item, index) => {
+                                    .map((item) => {
                                         if (
                                             Number(item.name) ||
                                             item.name === "CN"
@@ -100,21 +100,33 @@ class ScheduleView {
     renderSummary() {
         const markup = `
         <div class="container">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <td class="fw-bold text-center align-middle">STT</td>
-                        <td class="fw-bold text-center align-middle">Môn học</td>
-                        <td class="fw-bold text-center align-middle">Lớp</td>
-                        <td class="fw-bold text-center align-middle">Giảng viên</td>
-                        <td class="fw-bold text-center align-middle">Tín chỉ</td>
-                        <td class="col-1 fw-bold text-center align-middle">Hệ số</td>
-                        <td class="fw-bold text-center align-middle">Thành tiền</td>
-                    </tr>
-                </thead>
-                <tbody id="bodySummary">
-                </tbody>
-            </table>
+            <div class="alert alert-primary text-danger fw-bold text-center text-uppercase fs-5" role="alert">Danh sách học phần đăng ký</div>
+            <div class="d-flex col justify-content-end mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text" id="basic-addon1">Đơn giá</span>
+                        <input type="number" class="form-control" id="unitPrice" placeholder="Nhập giá tiền" aria-label="Giá tiền"
+                            aria-describedby="basic-addon1">
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive fixed hidden-scroll-bar">
+                <table class="table table-bordered">
+                    <thead class="bg-light">
+                        <tr class="fw-bold text-center align-middle">
+                            <td>STT</td>
+                            <td>Môn học</td>
+                            <td>Lớp</td>
+                            <td>Giảng viên</td>
+                            <td>Tín chỉ</td>
+                            <td class="col-1">Hệ số</td>
+                            <td>Thành tiền</td>
+                        </tr>
+                    </thead>
+                    <tbody id="bodySummary">
+                    </tbody>
+                </table>
+            </div>
         </div>
         `;
         view.insertAdjacentHTML("beforeend", markup);
@@ -192,7 +204,7 @@ class ScheduleView {
             <td>${classItem.teacher}</td>
             <td data-subject-code="${
                 summaryItem.subject.subjectCode
-            }" class="text-center align-middle" ${
+            }" id="credits" class="text-center align-middle" ${
                     classIndex === 0
                         ? `rowspan="${summaryItem.classList.length}"`
                         : ""
@@ -203,21 +215,24 @@ class ScheduleView {
                     classIndex === 0
                         ? `rowspan="${summaryItem.classList.length}"`
                         : ""
-                }><input class="form-control" type="number"/></td>
+                }><input class="form-control" type="number" value="${
+                    summaryItem.subject.coef
+                }" min="1" max="5" step="0.1" id="coef" data-subject-code="${
+                    summaryItem.subject.subjectCode
+                }"/></td>
             <td data-subject-code="${
                 summaryItem.subject.subjectCode
             }" class="text-center align-middle" ${
                     classIndex === 0
                         ? `rowspan="${summaryItem.classList.length}"`
                         : ""
-                }>1.000.000đ</td>
+                } id="amount"></td>
         </tr>`
             );
         });
 
         bodySummary.insertAdjacentHTML("beforeend", markupItems.join(""));
 
-        // Combine multiple queries
         // Combine multiple queries
         summary.forEach((summaryItem) => {
             const query = bodySummary.querySelectorAll(
@@ -227,18 +242,11 @@ class ScheduleView {
                 const td = trItem.querySelectorAll(
                     `td[data-subject-code="${summaryItem.subject.subjectCode}"]`
                 );
-                // if (index === 0) {
-                //     td.forEach((element) => {
-                //         element.setAttribute("rowspan", query.length);
-                //     });
-                // } else {
-                //     td.forEach((element) => {
-                //         element.classList.add("hidden");
-                //     });
-                // }
                 if (index != 0) {
                     td.forEach((element) => {
                         element.classList.add("hidden");
+                        element.innerHTML = ``;
+                        element.innerText = ``;
                     });
                 }
             });
@@ -249,18 +257,57 @@ class ScheduleView {
             0
         );
         const markupTotal = `
-        <tr>
-            <td class="fw-bold text-danger">Tổng</td>
-            <td class="fw-bold text-danger text-center">${summary.length} môn học</td>
+        <tfoot>
+        <tr class="fw-bold text-danger">
+            <td>Tổng</td>
+            <td>${summary.length} môn học</td>
             <td></td>
             <td></td>
-            <td class="fw-bold text-danger text-center">${totalCredits}</td>
+            <td>${totalCredits}</td>
             <td></td>
-            <td class="fw-bold text-danger">Tổng</td>
+            <td id="totalAmount"></td>
         </tr>
+        </tfoot>
         `;
 
-        bodySummary.insertAdjacentHTML("beforeend", markupTotal);
+        bodySummary.insertAdjacentHTML("afterend", markupTotal);
+    }
+
+    updateAmount(subjectCode, coefValue) {
+        const unitPrice = document.getElementById("unitPrice");
+
+        const credits = document.querySelector(
+            `td[id="credits"][data-subject-code="${subjectCode}"]`
+        );
+        const amount = document.querySelector(
+            `td[id="amount"][data-subject-code="${subjectCode}"]`
+        );
+
+        console.log(credits);
+        amount.innerHTML =
+            Math.round(
+                Number(credits.innerText) *
+                    Number(coefValue) *
+                    Number(unitPrice.value) *
+                    10
+            ) / 10;
+    }
+
+    updateTotalAmount() {
+        const amount = document.querySelectorAll(
+            `td[id="amount"][data-subject-code]`
+        );
+        const totalAmount = document.getElementById("totalAmount");
+        let total = 0;
+
+        amount.forEach((item) => {
+            total += Number(item.innerText);
+        });
+
+        totalAmount.innerText = total.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        });
     }
     loadClassroom(data) {
         const listGroup = document.getElementById("list-group");
@@ -331,13 +378,8 @@ class ScheduleView {
         for (let i = 0; i < classInfo.length; i++) {
             const item = classInfo[i];
             const flag = item.day.some((dayItem, i) => {
-                // console.log(
-                //     this.checkClass(subjectCode, dayItem, item.shift[i])
-                // );
                 return !this.checkClass(subjectCode, dayItem, item.shift[i]);
             });
-
-            // console.log(subjectCode, classInfo, flag);
 
             if (flag) {
                 this.unCheck(item._id, subjectCode);
@@ -390,18 +432,11 @@ class ScheduleView {
         // console.log("=================CHECK CLASS==================");
         const findAlias = this._day.filter((dayItem) => dayItem.key === day)[0];
         const [shiftStart, shiftEnd] = shift.split("-");
-        // console.log(findAlias, shiftStart, shiftEnd);
 
         for (let i = Number(shiftStart); i <= Number(shiftEnd); i++) {
             const tdId = `${findAlias.alias}_${i}`;
             const tdElement = document.getElementById(tdId);
             const datasetSubjectCode = tdElement.dataset.subjectCode;
-            // console.log(
-            //     "dataset",
-            //     datasetSubjectCode && datasetSubjectCode !== subjectCode
-            // );
-            // console.log("rowspan", tdElement.rowSpan > 1);
-            // console.log(tdElement.style.display === "hidden");
             if (datasetSubjectCode && datasetSubjectCode !== subjectCode)
                 return false;
 

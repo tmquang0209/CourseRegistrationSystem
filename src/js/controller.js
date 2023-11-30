@@ -116,7 +116,9 @@ const getSchedule = async (semesterId) => {
 const handleSearch = (keyword) => {
     const classList = document.querySelectorAll("tbody tr");
     for (let i = 0; i < classList.length; i++) {
-        const search = classList[i].innerHTML.includes(keyword);
+        const search = classList[i].innerHTML
+            .toLowerCase()
+            .includes(keyword.toLowerCase());
         classList[i].style.display = search ? "" : "none";
     }
 };
@@ -199,11 +201,15 @@ const scheduleController = async () => {
 
         const getSubject = await fetchSubject(parseEnrollId);
         //load list classroom can register
+        loading(true);
         scheduleView.loadClassroom(getSubject.data);
         scheduleView.renderSummary(getSubject.data);
+        loading(false);
 
         //handle when click to checkbox
+        loading(true);
         handleClassClick(getSubject.data);
+        loading(false);
 
         //add event listener when search input change
         const searchInput = document.getElementById("searchSubject");
@@ -212,8 +218,22 @@ const scheduleController = async () => {
         );
 
         //load register from database
+        loading(true);
         await loadScheduleRegister(parseEnrollId, enrollPassword);
         scheduleView.updateSummary(getSubject.data);
+        loading(false);
+
+        //add event listener input coef change
+        const coefInput = document.querySelectorAll(
+            `input[id="coef"][data-subject-code]`
+        );
+
+        coefInput.forEach((item) => {
+            item.addEventListener("input", () => {
+                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+                scheduleView.updateTotalAmount();
+            });
+        });
         return;
     }
 

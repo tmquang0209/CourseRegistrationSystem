@@ -54,7 +54,6 @@ class MainView {
         this._navItem.forEach((item) => {
             item.active = item.url === HASH_URI;
         });
-        console.log(this._navItem);
 
         // Update the header after the hash changes
         this.header();

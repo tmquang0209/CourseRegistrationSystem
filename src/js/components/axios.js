@@ -28,9 +28,8 @@ export const axiosPost = async (url, body) => {
             {
                 headers: {
                     "Content-Type": "application/json",
-                    Accept: "application/json", // Adjusted the Accept header
+                    Accept: "*/*",
                 },
-                withCredentials: true, // Include credentials with the request
             }
         );
         const responseData = await response.data;
