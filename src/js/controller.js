@@ -224,9 +224,14 @@ const scheduleController = async () => {
         loading(false);
 
         //add event listener input coef change
+        const unitPriceInput = document.getElementById("unitPrice");
         const coefInput = document.querySelectorAll(
             `input[id="coef"][data-subject-code]`
         );
+
+        unitPriceInput.addEventListener("input", () => {
+            scheduleView.updateTotalAmount();
+        });
 
         coefInput.forEach((item) => {
             item.addEventListener("input", () => {
