@@ -82,8 +82,11 @@ const homeController = async () => {
     const semester = document.getElementById("semester");
     const search = document.getElementById("search");
 
+    loading(true);
     const data = await getDataYear();
     homeView.updateForm(data);
+    loading(false);
+
     year.addEventListener("change", () =>
         data.map((item, index) => {
             if (item.yearId === Number(year.value) && year.value != "")
@@ -439,9 +442,25 @@ const handleSearchSubject = (searchValue) => {
                 : "none")
     );
 };
+
+const modal = () => {
+    const turnOff = document.getElementById("off");
+    turnOff.addEventListener("click", () => {
+        localStorage.set("modalShow", false, 15);
+    });
+    console.log(localStorage.get("modalShow"));
+    if (localStorage.get("modalShow") === null) {
+        const myModal = new bootstrap.Modal(
+            document.getElementById("notify"),
+            {}
+        );
+        myModal.show();
+    }
+};
 const init = () => {
     if (window.location.hash === "") window.location.href = "#home";
     mainController();
+    modal();
 };
 
 init();

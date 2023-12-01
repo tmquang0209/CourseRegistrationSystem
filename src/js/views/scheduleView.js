@@ -32,7 +32,7 @@ class ScheduleView {
                         <input id="searchSubject" type="text" class="form-control" placeholder="Tìm kiếm theo môn học/ lớp học"
                             aria-label="Tìm kiếm theo môn học" aria-describedby="basic-addon1">
                     </div>
-                    <div style="max-height:70vh;overflow-y:scroll;margin-bottom: 5vh;">
+                    <div style="max-height:50dvh;overflow-y:scroll;margin-bottom: 5dvh;">
                         <ul class="list-group" id="list-group">
                         </ul>
                     </div>
