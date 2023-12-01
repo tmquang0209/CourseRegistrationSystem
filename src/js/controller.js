@@ -378,7 +378,7 @@ const updateCoefValue = async (enrollId, password) => {
             coef: item.value,
         });
     });
-    console.log(getUnitPrice.value);
+
     //send to BE
     await updateSummary(enrollId, password, getUnitPrice.value, coefList);
 };
@@ -419,7 +419,6 @@ const handleClassClick = (data) => {
         );
 
         const reduceClass = [...new Set(findClass)];
-        console.log(reduceClass);
         scheduleView.addToTable(input.name, reduceClass);
         scheduleView.updateSummary(data);
     });
