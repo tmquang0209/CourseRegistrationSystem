@@ -257,8 +257,9 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
                 updateCoefValue(enrollId, enrollPassword);
             }, 1000);
         };
-
-        coefInput.forEach((item) => updateCoefInput(item));
+        setTimeout(() => {
+            coefInput.forEach((item) => updateCoefInput(item));
+        }, 2000);
 
         // Set up listeners for coefficient inputs
         const setupCoefInputListeners = () => {
