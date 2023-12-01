@@ -7,6 +7,8 @@ import {
     fetchSchedule,
     fetchScheduleRegister,
     fetchSubject,
+    fetchSummary,
+    updateSummary,
 } from "./API/schedule";
 import enrollView from "./views/enrollView";
 import { root, view } from "./elements";
@@ -191,63 +193,91 @@ const scheduleController = async () => {
 
     //If id in the URL is not equal to id in localStorage => Skip typing the password
     if (parseEnrollId === enrollId) {
-        //load schedule without password
-        localStorage.set("enrollId", parseEnrollId, 60);
-        localStorage.set("enrollPassword", enrollPassword, 60);
-
-        loading(true);
-        scheduleView.render();
-        loading(false);
-
-        const getSubject = await fetchSubject(parseEnrollId);
-        //load list classroom can register
-        loading(true);
-        scheduleView.loadClassroom(getSubject.data);
-        scheduleView.renderSummary(getSubject.data);
-        loading(false);
-
-        //handle when click to checkbox
-        loading(true);
-        handleClassClick(getSubject.data);
-        loading(false);
-
-        //add event listener when search input change
-        const searchInput = document.getElementById("searchSubject");
-        searchInput.addEventListener("input", () =>
-            handleSearchSubject(searchInput.value)
-        );
-
-        //load register from database
-        loading(true);
-        await loadScheduleRegister(parseEnrollId, enrollPassword);
-        scheduleView.updateSummary(getSubject.data);
-        loading(false);
-
-        //add event listener input coef change
-        const unitPriceInput = document.getElementById("unitPrice");
-        const coefInput = document.querySelectorAll(
-            `input[id="coef"][data-subject-code]`
-        );
-
-        unitPriceInput.addEventListener("input", () => {
-            coefInput.forEach((item) => {
-                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
-                scheduleView.updateTotalAmount();
-            });
-            scheduleView.updateTotalAmount();
-        });
-
-        coefInput.forEach((item) => {
-            item.addEventListener("input", () => {
-                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
-                scheduleView.updateTotalAmount();
-            });
-        });
+        loadScheduleWithoutPassword(enrollId, enrollPassword);
         return;
     }
 
     //If id in the URL is not equal to the id in localStorage => Typing the password
     await checkPassword(parseEnrollId);
+};
+
+const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
+    try {
+        // Set enrollId and enrollPassword in localStorage
+        localStorage.set("enrollId", enrollId, 60);
+        localStorage.set("enrollPassword", enrollPassword, 60);
+
+        // Render schedule
+        loading(true);
+        scheduleView.render();
+        loading(false);
+
+        // Fetch subject data
+        const getSubject = await fetchSubject(enrollId);
+
+        // Load classroom and render summary
+        loading(true);
+        scheduleView.loadClassroom(getSubject.data);
+        scheduleView.renderSummary(getSubject.data);
+        loading(false);
+
+        // Handle checkbox click
+        loading(true);
+        handleClassClick(getSubject.data);
+        loading(false);
+
+        // Add event listener for search input
+        const searchInput = document.getElementById("searchSubject");
+        searchInput.addEventListener("input", () =>
+            handleSearchSubject(searchInput.value)
+        );
+
+        // Load schedule register from the database
+        loading(true);
+        await loadScheduleRegister(enrollId, enrollPassword);
+        scheduleView.updateSummary(getSubject.data);
+
+        // Load and update coefficient values
+        loadCoefValue(enrollId, enrollPassword);
+        setTimeout(() => {
+            updateCoefValue(enrollId, enrollPassword);
+        }, 1000);
+        loading(false);
+        // Add event listener for unit price input
+        const unitPriceInput = document.getElementById("unitPrice");
+        const coefInput = document.querySelectorAll(
+            `input[id="coef"][data-subject-code]`
+        );
+
+        // Update amount and total amount for each coefficient input
+        const updateCoefInput = (item) => {
+            scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+            scheduleView.updateTotalAmount();
+            setTimeout(() => {
+                updateCoefValue(enrollId, enrollPassword);
+            }, 1000);
+        };
+
+        // Set up listeners for coefficient inputs
+        const setupCoefInputListeners = () => {
+            coefInput.forEach((item) => {
+                item.addEventListener("input", () => updateCoefInput(item));
+            });
+        };
+
+        // Set up listeners initially
+        setupCoefInputListeners();
+
+        // Add event listener for unit price input
+        unitPriceInput.addEventListener("input", () => {
+            // Update amount and total amount for each coefficient input
+            coefInput.forEach((item) => updateCoefInput(item));
+        });
+        return;
+    } catch (err) {
+        console.log("Error loading schedule without password", err);
+        window.location.href = "#enroll";
+    }
 };
 
 const checkPassword = async (parseEnrollId) => {
@@ -318,6 +348,36 @@ const loadScheduleRegister = async (enrollId, enrollPassword) => {
             }
         }
     });
+};
+
+const loadCoefValue = async (enrollId, password) => {
+    const fetchData = await fetchSummary(enrollId, password);
+
+    const unitPrice = document.getElementById("unitPrice");
+    unitPrice.value = fetchData.unitPrice;
+
+    fetchData.coefList.forEach((item) => {
+        const getInput = document.querySelector(
+            `input[id="coef"][data-subject-code="${item.subjectCode}"]`
+        );
+        getInput.value = item.coef;
+    });
+};
+
+const updateCoefValue = async (enrollId, password) => {
+    const coefList = [];
+    const getUnitPrice = document.getElementById("unitPrice");
+    const getCoefInput = document.querySelectorAll(`input[id="coef"]`);
+
+    getCoefInput.forEach((item) => {
+        coefList.push({
+            subjectCode: item.dataset.subjectCode,
+            coef: item.value,
+        });
+    });
+    console.log(getUnitPrice.value);
+    //send to BE
+    await updateSummary(enrollId, password, getUnitPrice.value, coefList);
 };
 
 const handleClassClick = (data) => {

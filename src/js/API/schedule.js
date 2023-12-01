@@ -18,3 +18,27 @@ export const fetchScheduleRegister = async (enrollId, password) => {
     };
     return axiosPost(url, body);
 };
+
+export const fetchSummary = async (enrollId, password) => {
+    const url = `/api/getCoefList`;
+
+    const body = { enrollId, password };
+    return axiosPost(url, body);
+};
+
+export const updateSummary = async (
+    enrollId,
+    password,
+    unitPrice,
+    coefList
+) => {
+    const url = `/api/updateCoefList`;
+    const body = {
+        enrollId,
+        password,
+        unitPrice,
+        coefList,
+    };
+
+    return axiosPost(url, body);
+};
