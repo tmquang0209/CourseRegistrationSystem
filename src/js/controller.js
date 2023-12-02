@@ -18,7 +18,7 @@ import scheduleView from "./views/scheduleView";
 import { decode } from "jsonwebtoken";
 //general
 const loading = (status) => {
-    const markup = `<div id="loading" class="text-center position-absolute top-50 start-50 translate-middle">
+    const markup = `<div id="loading" class="text-center position-fixed position-absolute top-50 start-50 translate-middle">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
@@ -49,7 +49,6 @@ const mainController = () => {
     window.addEventListener("hashchange", renderPageBaseOnHash);
 };
 
-// import * as elements from "./elements";
 const renderPageBaseOnHash = () => {
     loading(true);
 
@@ -226,7 +225,7 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
 
         // Handle checkbox click
         loading(true);
-        handleClassClick(getSubject.data);
+        handleClassClick(enrollId, enrollPassword, getSubject.data);
         loading(false);
 
         // Add event listener for search input
@@ -242,10 +241,13 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
 
         // Load and update coefficient values
         loadCoefValue(enrollId, enrollPassword);
+
         setTimeout(() => {
             updateCoefValue(enrollId, enrollPassword);
-        }, 1000);
+        }, 500);
+
         loading(false);
+
         // Add event listener for unit price input
         const unitPriceInput = document.getElementById("unitPrice");
         const coefInput = document.querySelectorAll(
@@ -256,13 +258,13 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
         const updateCoefInput = (item) => {
             scheduleView.updateAmount(item.dataset.subjectCode, item.value);
             scheduleView.updateTotalAmount();
-            setTimeout(() => {
-                updateCoefValue(enrollId, enrollPassword);
-            }, 1000);
+
+            updateCoefValue(enrollId, enrollPassword);
         };
+
         setTimeout(() => {
             coefInput.forEach((item) => updateCoefInput(item));
-        }, 2000);
+        }, 500);
 
         // Set up listeners for coefficient inputs
         const setupCoefInputListeners = () => {
@@ -302,7 +304,9 @@ const checkPassword = async (parseEnrollId) => {
         //else
         const responseData = response.data;
         const enrollPassword = localStorage.get("enrollPassword");
-        if (!enrollPassword) {
+        console.log(responseData);
+
+        if (responseData.password && !enrollPassword) {
             do {
                 //typing password
                 const password = prompt("Nhập mật khẩu để tiếp tục.");
@@ -386,7 +390,7 @@ const updateCoefValue = async (enrollId, password) => {
     await updateSummary(enrollId, password, getUnitPrice.value, coefList);
 };
 
-const handleClassClick = (data) => {
+const handleClassClick = (enrollId, enrollPassword, data) => {
     const listGroup = document.querySelector(".list-group");
 
     listGroup.addEventListener("click", function (e) {
@@ -396,9 +400,17 @@ const handleClassClick = (data) => {
         if (!input.checked) {
             scheduleView.removeFromTable(input.name);
             scheduleView.updateSummary(data);
-            setTimeout(() => {
-                scheduleView.saveToDB();
-            }, 1000);
+            const coefInput = document.querySelectorAll(`input[id="coef"]`);
+            console.log("=====");
+            coefInput.forEach((item) => {
+                console.log(item);
+                scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+                scheduleView.updateTotalAmount();
+
+                updateCoefValue(enrollId, enrollPassword);
+            });
+
+            scheduleView.saveToDB();
             return;
         }
 
@@ -422,8 +434,46 @@ const handleClassClick = (data) => {
         );
 
         const reduceClass = [...new Set(findClass)];
+
+        loading(true);
         scheduleView.addToTable(input.name, reduceClass);
+
         scheduleView.updateSummary(data);
+
+        // Add event listener for unit price input
+        const unitPriceInput = document.getElementById("unitPrice");
+        const coefInput = document.querySelectorAll(
+            `input[id="coef"][data-subject-code]`
+        );
+
+        // Update amount and total amount for each coefficient input
+        const updateCoefInput = (item) => {
+            scheduleView.updateAmount(item.dataset.subjectCode, item.value);
+            scheduleView.updateTotalAmount();
+
+            updateCoefValue(enrollId, enrollPassword);
+        };
+
+        setTimeout(() => {
+            coefInput.forEach((item) => updateCoefInput(item));
+        }, 500);
+        loading(false);
+
+        // Set up listeners for coefficient inputs
+        const setupCoefInputListeners = () => {
+            coefInput.forEach((item) => {
+                item.addEventListener("input", () => updateCoefInput(item));
+            });
+        };
+
+        // Set up listeners initially
+        setupCoefInputListeners();
+
+        // Add event listener for unit price input
+        unitPriceInput.addEventListener("input", () => {
+            // Update amount and total amount for each coefficient input
+            coefInput.forEach((item) => updateCoefInput(item));
+        });
     });
 };
 
@@ -448,7 +498,6 @@ const modal = () => {
     turnOff.addEventListener("click", () => {
         localStorage.set("modalShow", false, 15);
     });
-    console.log(localStorage.get("modalShow"));
     if (localStorage.get("modalShow") === null) {
         const myModal = new bootstrap.Modal(
             document.getElementById("notify"),

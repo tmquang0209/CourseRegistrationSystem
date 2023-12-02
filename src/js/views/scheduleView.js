@@ -119,7 +119,7 @@ class ScheduleView {
                             <td>Lớp</td>
                             <td>Giảng viên</td>
                             <td>Tín chỉ</td>
-                            <td class="col-1">Hệ số</td>
+                            <td class="col-2">Hệ số</td>
                             <td>Thành tiền</td>
                         </tr>
                     </thead>
@@ -287,6 +287,7 @@ class ScheduleView {
         const credits = document.querySelector(
             `td[id="credits"][data-subject-code="${subjectCode}"]`
         );
+
         const amount = document.querySelector(
             `td[id="amount"][data-subject-code="${subjectCode}"]`
         );
