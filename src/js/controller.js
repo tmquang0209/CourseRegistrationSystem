@@ -1,6 +1,5 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
-import { inject } from "@vercel/analytics/*";
 import homeView from "./views/homeView";
 import mainView from "./views/mainView";
 import fetchYear from "./API/year";
@@ -17,8 +16,6 @@ import { checkEnrollId, fetchEnroll } from "./API/enroll";
 import localStorage from "./components/localStorage";
 import scheduleView from "./views/scheduleView";
 import { decode } from "jsonwebtoken";
-
-inject();
 
 //general
 const loading = (status) => {
