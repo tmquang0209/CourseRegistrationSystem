@@ -1,24 +1,15 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
-import { inject } from "@vercel/analytics/*";
 import homeView from "./views/homeView";
 import mainView from "./views/mainView";
 import fetchYear from "./API/year";
-import {
-    fetchSchedule,
-    fetchScheduleRegister,
-    fetchSubject,
-    fetchSummary,
-    updateSummary,
-} from "./API/schedule";
+import { fetchSchedule, fetchScheduleRegister, fetchSubject, fetchSummary, updateSummary } from "./API/schedule";
 import enrollView from "./views/enrollView";
 import { root, view } from "./elements";
 import { checkEnrollId, fetchEnroll } from "./API/enroll";
 import localStorage from "./components/localStorage";
 import scheduleView from "./views/scheduleView";
 import { decode } from "jsonwebtoken";
-
-inject();
 
 //general
 const loading = (status) => {
@@ -29,8 +20,7 @@ const loading = (status) => {
         </div>`;
     const loadingElement = document.getElementById("loading");
     if (status) view.insertAdjacentHTML("afterbegin", markup);
-    else if (loadingElement)
-        loadingElement.parentElement.removeChild(loadingElement);
+    else if (loadingElement) loadingElement.parentElement.removeChild(loadingElement);
 };
 
 const getDataYear = async () => {
@@ -92,8 +82,7 @@ const homeController = async () => {
 
     year.addEventListener("change", () =>
         data.map((item, index) => {
-            if (item.yearId === Number(year.value) && year.value != "")
-                handleYearChange(data[index].semesters);
+            if (item.yearId === Number(year.value) && year.value != "") handleYearChange(data[index].semesters);
         })
     );
 
@@ -124,9 +113,7 @@ const getSchedule = async (semesterId) => {
 const handleSearch = (keyword) => {
     const classList = document.querySelectorAll("tbody tr");
     for (let i = 0; i < classList.length; i++) {
-        const search = classList[i].innerHTML
-            .toLowerCase()
-            .includes(keyword.toLowerCase());
+        const search = classList[i].innerHTML.toLowerCase().includes(keyword.toLowerCase());
         classList[i].style.display = search ? "" : "none";
     }
 };
@@ -144,8 +131,7 @@ const enrollController = async () => {
     enrollView.updateForm(yearData);
     year.addEventListener("change", () =>
         yearData.map((item, index) => {
-            if (item.yearId === Number(year.value))
-                handleYearChange(yearData[index].semesters);
+            if (item.yearId === Number(year.value)) handleYearChange(yearData[index].semesters);
         })
     );
 
@@ -161,11 +147,7 @@ const handleSubmitEnroll = async () => {
 
     if (studentCode.value && year.value && semester.value) {
         try {
-            const enrollData = await fetchEnroll(
-                semester.value,
-                studentCode.value,
-                password.value
-            );
+            const enrollData = await fetchEnroll(semester.value, studentCode.value, password.value);
             if (enrollData.message) {
                 enrollView.renderNotification(enrollData.message, "danger");
                 return;
@@ -192,7 +174,8 @@ const scheduleController = async () => {
 
     //Get enroll id from url
     const parseEnrollId = HASH_URI.replace("#schedule/", "");
-
+    localStorage.set("enrollId", parseEnrollId);
+    
     //Get enrollId and enrollPassword from localStorage
     const enrollId = localStorage.get("enrollId");
     const enrollPassword = localStorage.get("enrollPassword");
@@ -234,9 +217,7 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
 
         // Add event listener for search input
         const searchInput = document.getElementById("searchSubject");
-        searchInput.addEventListener("input", () =>
-            handleSearchSubject(searchInput.value)
-        );
+        searchInput.addEventListener("input", () => handleSearchSubject(searchInput.value));
 
         // Load schedule register from the database
         loading(true);
@@ -254,9 +235,7 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
 
         // Add event listener for unit price input
         const unitPriceInput = document.getElementById("unitPrice");
-        const coefInput = document.querySelectorAll(
-            `input[id="coef"][data-subject-code]`
-        );
+        const coefInput = document.querySelectorAll(`input[id="coef"][data-subject-code]`);
 
         // Update amount and total amount for each coefficient input
         const updateCoefInput = (item) => {
@@ -319,11 +298,7 @@ const checkPassword = async (parseEnrollId) => {
                 //if true => save to localStorage => render schedule
                 if (decodePassword.password === password) {
                     localStorage.set("enrollId", parseEnrollId, 60);
-                    localStorage.set(
-                        "enrollPassword",
-                        responseData.password,
-                        60
-                    );
+                    localStorage.set("enrollPassword", responseData.password, 60);
                     window.location.reload();
                     break;
                 }
@@ -338,19 +313,14 @@ const checkPassword = async (parseEnrollId) => {
 
 const loadScheduleRegister = async (enrollId, enrollPassword) => {
     //load class register in db
-    const getClassRegister = await fetchScheduleRegister(
-        enrollId,
-        enrollPassword
-    );
+    const getClassRegister = await fetchScheduleRegister(enrollId, enrollPassword);
     //get
     const classRegisterData = getClassRegister.data;
     classRegisterData.schedule.map((item) => {
         //add to table
         scheduleView.addToTable(item.subject.subjectCode, item.classList);
         //set checked
-        const getCheckboxBySubject = document.querySelectorAll(
-            `input[name="${item.subject.subjectCode}"]`
-        );
+        const getCheckboxBySubject = document.querySelectorAll(`input[name="${item.subject.subjectCode}"]`);
         for (let i = 0; i < getCheckboxBySubject.length; i++) {
             const element = getCheckboxBySubject[i];
             const id = element.id.split(",");
@@ -371,9 +341,7 @@ const loadCoefValue = async (enrollId, password) => {
     unitPrice.value = fetchData.unitPrice;
 
     fetchData.coefList.forEach((item) => {
-        const getInput = document.querySelector(
-            `input[id="coef"][data-subject-code="${item.subjectCode}"]`
-        );
+        const getInput = document.querySelector(`input[id="coef"][data-subject-code="${item.subjectCode}"]`);
         getInput.value = item.coef;
     });
 };
@@ -427,15 +395,9 @@ const handleClassClick = (enrollId, enrollPassword, data) => {
 
         const classIds = input.id.split(",").map((item) => item.trim());
 
-        const findSubject = data.find(
-            (item) => item.subject.subjectCode === input.name
-        );
+        const findSubject = data.find((item) => item.subject.subjectCode === input.name);
 
-        const findClass = classIds.flatMap((classId) =>
-            findSubject.classList.filter((classItem) =>
-                classItem._id.includes(classId.trim())
-            )
-        );
+        const findClass = classIds.flatMap((classId) => findSubject.classList.filter((classItem) => classItem._id.includes(classId.trim())));
 
         const reduceClass = [...new Set(findClass)];
 
@@ -446,9 +408,7 @@ const handleClassClick = (enrollId, enrollPassword, data) => {
 
         // Add event listener for unit price input
         const unitPriceInput = document.getElementById("unitPrice");
-        const coefInput = document.querySelectorAll(
-            `input[id="coef"][data-subject-code]`
-        );
+        const coefInput = document.querySelectorAll(`input[id="coef"][data-subject-code]`);
 
         // Update amount and total amount for each coefficient input
         const updateCoefInput = (item) => {
@@ -482,19 +442,10 @@ const handleClassClick = (enrollId, enrollPassword, data) => {
 };
 
 const handleSearchSubject = (searchValue) => {
-    const listGroup = document.querySelectorAll(
-        "#list-group > .list-group-item"
-    );
+    const listGroup = document.querySelectorAll("#list-group > .list-group-item");
     const arrListGroup = Array.from(listGroup);
 
-    arrListGroup.map(
-        (item) =>
-            (item.style.display = item.innerText
-                .toLowerCase()
-                .includes(searchValue.toLowerCase())
-                ? ""
-                : "none")
-    );
+    arrListGroup.map((item) => (item.style.display = item.innerText.toLowerCase().includes(searchValue.toLowerCase()) ? "" : "none"));
 };
 
 const modal = () => {
@@ -503,10 +454,7 @@ const modal = () => {
         localStorage.set("modalShow", false, 15);
     });
     if (localStorage.get("modalShow") === null) {
-        const myModal = new bootstrap.Modal(
-            document.getElementById("notify"),
-            {}
-        );
+        const myModal = new bootstrap.Modal(document.getElementById("notify"), {});
         myModal.show();
     }
 };
