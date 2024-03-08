@@ -207,16 +207,17 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
 
         // Fetch subject data
         const getSubject = await fetchSubject(enrollId);
+        console.log(getSubject);
 
         // Load classroom and render summary
         loading(true);
-        scheduleView.loadClassroom(getSubject.data);
-        scheduleView.renderSummary(getSubject.data);
+        scheduleView.loadClassroom(getSubject?.data);
+        scheduleView.renderSummary(getSubject?.data);
         loading(false);
 
         // Handle checkbox click
         loading(true);
-        handleClassClick(enrollId, enrollPassword, getSubject.data);
+        handleClassClick(enrollId, enrollPassword, getSubject?.data);
         loading(false);
 
         // Add event listener for search input
@@ -226,7 +227,7 @@ const loadScheduleWithoutPassword = async (enrollId, enrollPassword) => {
         // Load schedule register from the database
         loading(true);
         await loadScheduleRegister(enrollId, enrollPassword);
-        scheduleView.updateSummary(getSubject.data);
+        scheduleView.updateSummary(getSubject?.data);
 
         // Load and update coefficient values
         loadCoefValue(enrollId, enrollPassword);
