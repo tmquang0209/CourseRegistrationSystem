@@ -320,8 +320,8 @@ const loadScheduleRegister = async (enrollId, enrollPassword) => {
     //load class register in db
     const getClassRegister = await fetchScheduleRegister(enrollId, enrollPassword);
     //get
-    const classRegisterData = getClassRegister.data;
-    classRegisterData.schedule.map((item) => {
+    const classRegisterData = getClassRegister?.data;
+    classRegisterData?.schedule.map((item) => {
         //add to table
         scheduleView.addToTable(item.subject.subjectCode, item.classList);
         //set checked
