@@ -177,7 +177,7 @@ const scheduleController = async () => {
 
     //Get enrollId and enrollPassword from localStorage
     const enrollId = localStorage.get("enrollId");
-    if (!enrollId) localStorage.set("enrollId", parseEnrollId, 60);
+    if (!enrollId || enrollId != parseEnrollId) localStorage.set("enrollId", parseEnrollId, 60);
     const enrollPassword = localStorage.get("enrollPassword");
 
     //If id in the URL is not equal to id in localStorage => Skip typing the password
